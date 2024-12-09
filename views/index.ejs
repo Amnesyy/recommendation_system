@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pl">
+<%- include('header') %>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekomendacje</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.21.0/cytoscape.min.js"></script>
+    <style>
+        #cy {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ccc;
+        }
+        #node-info {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #0074D9;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <h1>Rekomendacje</h1>
+    <h2>Po dodaniu obiektu bądź osoby nie pojawia się ona od razu na grafie, pierwsze wymagane jest stworzenie relacji</h2>
+    <div id="cy"></div>
+    <div id="node-info">
+        <strong>Informacje o węźle:</strong>
+        <div id="node-details">Kliknij na węzeł, aby zobaczyć szczegóły.</div>
+    </div>
+
+    <script>
+        // Pobierz dane grafu
+        const graphData = <% if (typeof graphData !== 'undefined') { %>
+            <%- JSON.stringify(graphData) %>
+        <% } else { %>
+            []; // Pusta tablica w przypadku braku danych
+        <% } %>;
+
+        // Przekształć dane na format dla Cytoscape.js
+        const elements = [];
+        graphData.forEach(({ from, to, relation }) => {
+        elements.push(
+        {
+            data: {
+                id: from.id,
+                label: from.label || 'Nieznany', // Domyślna wartość, jeśli brak
+                details: from
+            }
+        },
+        {
+            data: {
+                id: to.id,
+                label: to.label || 'Nieznany', // Domyślna wartość, jeśli brak
+                details: to
+            }
+        },
+        {
+            data: {
+                source: from.id,
+                target: to.id,
+                label: relation.type || ''
+            }
+        }
+    );
+});
+
+
+        // Renderowanie grafu
+        const cy = cytoscape({
+            container: document.getElementById('cy'),
+            elements: elements,
+            style: [
+                {
+                    selector: 'node',
+                    style: {
+                        'content': 'data(label)',
+                        'background-color': '#0074D9',
+                        'color': '#fff',
+                        'text-valign': 'center',
+                        'text-halign': 'center',
+                        'width': 50,
+                        'height': 50,
+                        'font-size': function (ele) {
+                            const label = ele.data('label') || '';
+                            return Math.max(8, Math.min(14, 100 / label.length)); // Dynamiczne dopasowanie
+                        }
+                    }
+                },
+                {
+                    selector: 'edge',
+                    style: {
+                        'line-color': '#0074D9',
+                        'target-arrow-color': '#0074D9',
+                        'target-arrow-shape': 'triangle',
+                        'label': 'data(label)',
+                        'font-size': 10
+                    }
+                }
+            ],
+            layout: {
+                name: 'cose',
+                padding: 10
+            }
+        });
+
+        // Wyświetlanie informacji o węźle po kliknięciu
+        cy.on('tap', 'node', function (evt) {
+            const node = evt.target;
+            const details = node.data('details') || {};
+            const detailsHtml = `
+                <ul>
+                    ${Object.entries(details).map(([key, value]) => `<li><strong>${key}:</strong> ${value}</li>`).join('')}
+                </ul>
+            `;
+            document.getElementById('node-details').innerHTML = detailsHtml;
+        });
+
+        // Resetowanie informacji, jeśli kliknięto poza węzłem
+        cy.on('tap', function (evt) {
+            if (evt.target === cy) {
+                document.getElementById('node-details').innerHTML = 'Kliknij na węzeł, aby zobaczyć szczegóły.';
+            }
+        });
+    </script>
+</body>
+</html>

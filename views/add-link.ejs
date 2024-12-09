@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<%- include('header') %>
+<body>
+  <h1>Dodaj relację</h1>
+  <form action="/add-link" method="POST">
+    <label>Od(id): <input type="number" name="from" required></label><br>
+    <label>Do(id): <input type="number" name="to" required></label><br>
+    
+    <!-- Dodanie wyboru rodzaju relacji -->
+    <label>Rodzaj relacji: 
+      <select name="relation" required>
+        <option value="LUBI">Lubi</option>
+        <option value="POLECA">Poleca</option>
+      </select>
+    </label><br>
+
+    <button type="submit">Dodaj</button>
+  </form>
+</body>
+</html>

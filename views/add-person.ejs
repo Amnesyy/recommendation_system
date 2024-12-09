@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<%- include('header') %>
+<body>
+  <h1>Dodaj osobę</h1>
+  <form action="/add-person" method="POST">
+    <label>Imię: <input type="text" name="name" required></label><br>
+    <label>Wiek: <input type="number" name="age" required></label><br>
+    <button type="submit">Dodaj</button>
+  </form>
+</body>
+</html>
